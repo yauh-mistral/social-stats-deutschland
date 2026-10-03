@@ -10,7 +10,8 @@ Quellabruf (GENESIS / Zensus / BfN / BKG) → Parsing → Merge → XLSX-Build.
 
 - **Datensatz v3** — 109 Spalten × 400 Kreise, inkl. Registry
   (Bezeichnung, Einheit, Quelle, Erhebungsstand, Link, Anmerkung,
-  Themenblock je Spalte). Wird per `merge.py` erzeugt
+  Themenblock je Spalte) — die Quelle der Wahrheit für die Herkunft
+  jeder Spalte (s. „Quellen“). Wird per `merge.py` erzeugt
   (`data/merged_raw_v3.json`) und ist nicht selbst committet, sondern
   aus den committeten Daten reproduzierbar.
 - **Release-Artefakte in `data/`** — `deutschland-rohdaten.xlsx`
@@ -88,16 +89,27 @@ die Originaldatei byte-identisch wieder her (nur Standardbibliothek).
 
 ## Quellen
 
-| Daten | Quelle | Stand |
-|---|---|---|
-| 96 Grundspalten | Destatis/GENESIS, PKS, eigene Metadaten | 02.10.2026 |
-| Krankenhäuser, Betten | [GENESIS 23111-01-05-4-B](https://www.regionalstatistik.de/genesisws/downloader/00/tables/23111-01-05-4-B_00.csv) | 31.12.2024 |
-| Schulen | [GENESIS 21111-01-03-4-B](https://www.regionalstatistik.de/genesisws/downloader/00/tables/21111-01-03-4-B_00.csv) | Schuljahr 2023/24 |
-| Kreisfläche, Wasser | [GENESIS 33111-01-02-4](https://www.regionalstatistik.de/genesisws/downloader/00/tables/33111-01-02-4_00.csv) | 31.12.2021 |
-| Erholungsfläche | [GENESIS 33111-02-01-4](https://www.regionalstatistik.de/genesisws/downloader/00/tables/33111-02-01-4_00.csv) | 31.12.2021 |
-| Migration | Zensus 2022, [Tabelle 1000A-1011](https://ergebnisse.zensus2022.de/) | 15.05.2022 |
-| Naturschutzgebiete | [BfN-WFS schutzgebiet](https://geodienste.bfn.de/ogc/wfs/schutzgebiet) | 03.10.2026 |
-| Kreisgrenzen | [BKG VG250](https://daten.gdz.bkg.bund.de/produkte/vg/vg250_ebenen_1231/aktuell/vg250_12-31.utm32s.shape.ebenen.zip) (EPSG:25832) | 31.12. |
+Die konkrete Herkunft **jeder einzelnen** Spalte — Tabelle, Erhebungsstand,
+Link und Anmerkung — steht vollständig und verbindlich in der Registry
+(Blatt „Quellen & Variablen“ der XLSX bzw.
+`data/deutschland-variablen.parquet` — 109 Einträge, einer je Spalte). Diese Übersicht bleibt bewusst auf
+Herausgeber-Ebene generisch; Datenabruf 02.–03.10.2026.
+
+| Herausgeber | Spalten | Themen |
+|---|---:|---|
+| BBSR — Deutschlandatlas (inkl. regionaler Preisindex mit IW Köln) | 58 | Wohnen, Erwerbsleben, Pflege, Kinderbetreuung, Bildung, Sicherheit, Flächennutzung, Demografie, Infrastruktur, Soziales, Schulden |
+| Destatis — GENESIS-Online/Regionalstatistik, Statistische Ämter | 20 | Bevölkerung, Beschäftigte, Krankenhäuser, Schulen, Fläche, Finanzen, Verkehrstote |
+| BKA — Polizeiliche Kriminalstatistik | 13 | Kriminalität (Fallzahlen je 100.000) |
+| Projekt — eigene Berechnungen und Metadaten | 7 | `bl`, `ost`, `type` sowie abgeleitete Raten (`kaufkraft_proxy`, `verkehrstote_hz`, `betten_100k`, `schulen_100k`) |
+| Zensus 2022 (Destatis) | 3 | Migration, Wohnfläche |
+| VGR der Länder (Statistikportal der Länder) | 3 | Einkommen, BIP, VGR-Kurzname |
+| BfN — WFS Naturschutzgebiete (Kreiszuordnung gegen BKG-VG250) | 3 | Naturschutz |
+| KBV — Bundesarztregister (Versorgungsatlas) | 1 | Ärzte |
+| Die Bundeswahlleiterin | 1 | Wahlbeteiligung |
+
+Die Downloads selbst machen die `fetch_*.py`-Skripte (URLs siehe dort);
+die Kreisgrenzen der BKG VG250 fließen nur als Geometrie in die
+NSG-Zuordnung ein, nicht als eigene Datenspalten.
 
 ## Methodik: NSG-Zuordnung (100-m-Raster)
 

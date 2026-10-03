@@ -93,6 +93,12 @@ Kontext laden, bevor Skripte geändert werden.
   `data/` ist committet und zugleich Quelle der Wahrheit für den XLSX-Build.
 - Der Join-Schlüssel ist immer `rs`, 5-stellig, als **String**
   (führende Nullen!).
+- Quellen-Dokumentation zweistufig: Das README bleibt auf
+  Herausgeber-Ebene generisch (BBSR, Destatis, BKA, BfN, …); die
+  konkrete Tabelle je Spalte (Nummer, Erhebungsstand, Link,
+  Anmerkung) steht ausschließlich in der Registry (Blatt „Quellen &
+  Variablen“). Bei neuen Spalten beides pflegen: Registry-Eintrag
+  verpflichtend, README-Tabelle nur bei neuem Herausgeber.
 
 ## Typische Aufgaben
 
