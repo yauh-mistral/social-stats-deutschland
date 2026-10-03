@@ -16,9 +16,11 @@ Quellabruf (GENESIS / Zensus / BfN / BKG) → Parsing → Merge → XLSX-Build.
 - **`dist/deutschland-rohdaten.xlsx`** — die fertige Mappe (2 Blätter:
   „Rohdaten“ + „Quellen & Variablen“), regenerierbar per `build_xlsx.py`
   (nicht committet, da Binärformat). Der committete Release-Build liegt
-  als `data/deutschland-rohdaten.xlsx` — Achtung: dort steckt noch der
-  **alte 107-Spalten-Stand ohne NSG**. Aktualisieren mit
-  `python3 src/build_xlsx.py data/deutschland-rohdaten.xlsx` + Commit.
+  als `data/deutschland-rohdaten.xlsx` und wird **automatisch per GitHub
+  Actions** aktualisiert (`.github/workflows/build-xlsx.yml`): nach jedem
+  Push auf `main` läuft die Pipeline (entpacken → mergen → bauen) und der
+  Bot committet die XLSX, falls sich Inhalte geändert haben. Manuell geht
+  es weiterhin per `python3 src/build_xlsx.py data/deutschland-rohdaten.xlsx`.
 
 ### Spaltenblöcke
 
@@ -171,11 +173,20 @@ nach Prüfung des Abgleichsberichts.
 │   ├── mig_zensus.json              # Zensus-Migrationswerte je AGS (1000A-1011)
 │   ├── nsg_je_kreis.json            # NSG-Spalten je AGS + Validierungs-Metadaten
 │   ├── registry_new.json            # Registry-Einträge der 13 neuen Spalten
-│   └── deutschland-rohdaten.xlsx    # Release-Build (noch alter Stand, s. o.)
+│   └── deutschland-rohdaten.xlsx    # Release-Build (GitHub Actions hält ihn aktuell)
 │       (merged_raw_base.json entpackt + merged_raw_v3.json + dist/* werden regeneriert)
 ├── raw/                    # Downloads (.gitignore'd)
 └── dist/                   # generierte XLSX/Parquet (.gitignore'd)
 ```
+
+## Automatischer XLSX-Build (GitHub Actions)
+
+`.github/workflows/build-xlsx.yml` baut nach jedem Push auf `main`
+(Pfade `data/**`, `src/**`, Workflow selbst) die `data/deutschland-rohdaten.xlsx`
+aus den committeten Basisdateien und committet sie bei inhaltlicher
+Änderung (`chore(data): … [skip ci]`, Bot-Identität). Benötigt nur
+`openpyxl` — die Kernpipeline kommt ohne numpy aus. Auch manuell
+startbar: *Actions → Build XLSX → Run workflow*.
 
 ## Join-Schlüssel
 

@@ -121,3 +121,7 @@ benötigt.
   erst die Ursache in den Quelldaten finden.
 - `data/merged_raw_base.json` (entpackt) nicht committen; die
   xz+Ascii85-Fassung ist die committete Form.
+- `data/deutschland-rohdaten.xlsx` nicht manuell bauen und committen:
+  Der GitHub-Actions-Workflow `build-xlsx.yml` baut sie nach jedem
+  Push automatisch aus den committeten Basisdateien und committet sie
+  bei inhaltlicher Änderung selbst.
