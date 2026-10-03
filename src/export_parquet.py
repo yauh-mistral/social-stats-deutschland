@@ -2,7 +2,7 @@
 """export_parquet.py — Parquet-Export der committeten XLSX für die R-Analyse.
 
 Liest data/deutschland-rohdaten.xlsx (beide Blätter) und schreibt:
-  - dist/deutschland-rohdaten.parquet        (400 Kreise x 107 Spalten)
+  - dist/deutschland-rohdaten.parquet        (400 Kreise x 109 Spalten)
   - dist/deutschland-variablen.parquet      (Registry: Bezeichnung, Einheit,
                                             Quelle, Erhebungsstand, Link,
                                             Anmerkung je Spalte)
@@ -70,7 +70,7 @@ def load_registry(ws):
     header = [str(h) for h in rows[start]]
     reg = [[_norm(v) for v in r[:len(header)]] for r in rows[start + 1:]
            if r[0] is not None]
-    assert len(reg) == 107, len(reg)
+    assert len(reg) == 109, len(reg)
     fields = [pa.field(h, pa.string(), nullable=True) for h in header]
     return pa.table({f.name: pa.array([r[i] for r in reg], type=f.type)
                      for i, f in enumerate(fields)})

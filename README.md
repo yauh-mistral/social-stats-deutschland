@@ -14,8 +14,11 @@ Quellabruf (GENESIS / Zensus / BfN / BKG) → Parsing → Merge → XLSX-Build.
   (`data/merged_raw_v3.json`) und ist nicht selbst committet, sondern
   aus den committeten Daten reproduzierbar.
 - **`dist/deutschland-rohdaten.xlsx`** — die fertige Mappe (2 Blätter:
-  „Rohdaten\" + „Quellen & Variablen\"), regenerierbar per `build_xlsx.py`
-  (nicht committet, da Binärformat).
+  „Rohdaten“ + „Quellen & Variablen“), regenerierbar per `build_xlsx.py`
+  (nicht committet, da Binärformat). Der committete Release-Build liegt
+  als `data/deutschland-rohdaten.xlsx` — Achtung: dort steckt noch der
+  **alte 107-Spalten-Stand ohne NSG**. Aktualisieren mit
+  `python3 src/build_xlsx.py data/deutschland-rohdaten.xlsx` + Commit.
 
 ### Spaltenblöcke
 
@@ -46,21 +49,27 @@ fetch_vg250.py     -> raw/vg250/
                                       export_parquet.py -> dist/*.parquet (R-Analyse)
 ```
 
-Alles läuft mit Python 3 + NumPy + openpyxl (`pip install numpy openpyxl`).
+Alles läuft mit Python 3 + NumPy + openpyxl
+(`pip install numpy openpyxl`); nur der Parquet-Export benötigt
+zusätzlich pyarrow (`pip install pyarrow`).
 
 ### Kompletter Rebuild
 
 ```bash
 python3 src/unpack_base.py     # data/merged_raw_base.json entpacken (einmalig)
-python3 src/fetch_genesis.py    # 4 GENESIS-CSVs (~1 MB)
-python3 src/fetch_vg250.py      # BKG VG250 Shape-Zip (~30 MB)
-python3 src/fetch_nsg.py        # BfN-WFS, 19 Chunks (~106 MB)
+python3 src/fetch_genesis.py    # 4 GENESIS-CSVs (~1 MB)        [optional, data/ committet]
 python3 src/parse_genesis.py    # Validierung: KH 1.841, Betten 472.851, ...
-python3 src/parse_nsg.py        # Raster-Zuordnung (s. u.)
+python3 src/parse_zensus.py    # mig-Spalten (aus data/mig_zensus.json; s. u.)
 python3 src/merge.py            # 109 Spalten, Prüfzahlen-Assertions
 python3 src/build_xlsx.py       # dist/deutschland-rohdaten.xlsx
-python3 src/export_parquet.py   # dist/deutschland-rohdaten.parquet + variablen.parquet
+python3 src/export_parquet.py   # dist/*.parquet (benötigt pyarrow)
 ```
+
+Nur für einen NSG-Neuaufbau zusätzlich: `fetch_vg250.py` (BKG, ~30 MB),
+`fetch_nsg.py` (BfN-WFS, ~106 MB), dann `parse_nsg.py` (s. u.). Der
+Zensus-Abruf (`fetch_zensus.py`) ist derzeit nicht möglich (404, s. u.);
+`parse_zensus.py --from-raw` rechnet die Werte, sobald die API wieder
+liefert.
 
 Da die Rohdaten groß sind, sind die Zwischenergebnisse in `data/`
 committet — die XLSX lässt sich allein daraus rebuilden. Die v1-Basis
@@ -90,8 +99,12 @@ Polygonflächensumme 2.749.755 ha) werden den Kreisen räumlich zugeordnet:
   in ein Deutschland-Raster mit 100-m-Zellen gebrannt (1 Zelle = 1 ha;
   29 AGS liegen als Teilgeometrien in mehreren SHP-Records und werden je AGS
   zusammengefasst).
-- **Ringe < 500 ha:** Ganzring-Schwerpunktzuordnung (exakte Gauß'sche
-  Dreiecksfläche).
+- **Ringe < 500 ha:** Ganzringzuordnung mit exakter Gauß'scher
+  Dreiecksfläche an den Kreis mit der **Zellmehrheit** im Ring (>50 % der
+  überdeckten Zellen Kreisgebiet); Ringe kleiner als eine Rasterzelle
+  werden über die Schwerpunkt-Zelle zugeordnet. Liegt der Schwerpunkt
+  außerhalb der Kreisflächen (Meer, Bodensee, Bundeswasserstraßen),
+  bleibt der Ring unberücksichtigt.
 - **Ringe ≥ 500 ha:** flächengenaue Zuordnung je Rasterzelle (Zellmitte →
   Kreis-Lookup, `np.bincount` × 1 ha).
 - **Ergebnis:** 1.502.641 ha innerhalb der Kreisflächen zugewiesen;
@@ -102,6 +115,13 @@ Polygonflächensumme 2.749.755 ha) werden den Kreisen räumlich zugeordnet:
 Kreisgrenzen. Raster- vs. GENESIS-Kreisfläche: median 0,103 % / max 6,13 %
 Abweichung (Watt-/Küstenbereiche). Wattenmeer gehört — konsistent mit der
 GENESIS-Bodenfläche — zum Kreisgebiet (z. B. Nordfriesland groß).
+
+`src/parse_nsg.py` ist eine getreue Rekonstruktion des validierten Laufs
+und gegen die committeten Werte getestet: alle globalen Prüfgroßen stimmen
+exakt, je Kreis reproduziert der Rebuild 290/400 Werte exakt (Gesamtsumme
++0,02 %, max. ~330 ha Abweichung durch Randkonventionen beim Zell-Fill).
+Die committeten Werte bleiben verbindlich; `--write` überschreibt sie nur
+nach Prüfung des Abgleichsberichts.
 
 ## Validierte Prüfzahlen
 
@@ -121,28 +141,38 @@ GENESIS-Bodenfläche — zum Kreisgebiet (z. B. Nordfriesland groß).
 
 - **Zensus-API:** Der Tabellen-Endpunkt von ergebnisse.zensus2022.de
   antwortet derzeit mit 404 (Stand 03.10.2026; Basis-Endpunkte wie
-  `helloworld/whoami` funktionieren). Das Rezept des funktionierenden
-  Abrufs ist in `src/fetch_zensus.py` dokumentiert; die mig-Werte sind
-  vollständig in `data/genesis_neu.json` committet.
+  `helloworld/whoami` funktionieren). Das verifizierte Abruf-Rezept ist
+  in `src/fetch_zensus.py` implementiert; die mig-Werte sind vollständig
+  als `data/mig_zensus.json` committet. Sobald die API antwortet:
+  `fetch_zensus.py` → `parse_zensus.py --from-raw`.
 - **Alt-AGS:** Die GENESIS-Tabellen enthalten teils Alt-Regionalschlüssel
   (z. B. Eisenach `16056`) — der Parser filtert auf die 400 Ziel-AGS.
 - **Berlin/Hamburg:** In den Flächentabellen als Sonderfälle
   (Hamburg = Land-Zeile `02`, Berlin = Summe der 12 Bezirke, 8-stellig).
-- **`parse_nsg.py`** ist eine getreue Rekonstruktion des validierten Laufs
-  vom 03.10.2026; für einen echten Rebuild werden die 106 MB WFS-Rohdaten
-  benötigt (`fetch_nsg.py`). Die committierten Werte stammen aus dem
-  validierten Lauf.
+- **`parse_nsg.py`** rekonstruiert den validierten Lauf vom 03.10.2026
+  (getestet, s. Methodik); für einen Rebuild werden die 106 MB WFS-Rohdaten
+  (`fetch_nsg.py`) und die BKG-VG250 (`fetch_vg250.py`) benötigt. Die
+  committeten Werte stammen aus dem validierten Lauf und bleiben
+  verbindlich. Die Zählweise `unassigned_bl` der committierten Datei ist
+  nicht vollständig rekonstruierbar (Debug-Statistik des Originallaufs).
 
 ## Projektstruktur
 
 ```
+├── AGENTS.md               # Agent-Anweisungen + KI-Disclosure (Stolperfallen, Konventionen)
+├── README.md
 ├── src/                    # Pipeline-Skripte (keine externen Abhängigkeiten außer numpy/openpyxl)
+│   ├── fetch_genesis.py / fetch_zensus.py / fetch_nsg.py / fetch_vg250.py
+│   ├── parse_genesis.py / parse_zensus.py / parse_nsg.py
+│   └── unpack_base.py / merge.py / build_xlsx.py / export_parquet.py
 ├── data/                   # committete Daten + Registry
 │   ├── merged_raw_base.json.xz.a85  # v1-Basis, 96 Spalten (xz+Ascii85, entpacken per unpack_base.py)
-│   ├── genesis_neu.json             # GENESIS/Zensus-Spalten je AGS
+│   ├── genesis_neu.json             # GENESIS-Spalten je AGS (10 Spalten inkl. mig)
+│   ├── mig_zensus.json              # Zensus-Migrationswerte je AGS (1000A-1011)
 │   ├── nsg_je_kreis.json            # NSG-Spalten je AGS + Validierungs-Metadaten
-│   └── registry_new.json            # Registry-Einträge der 13 neuen Spalten
-│       (merged_raw_v3.json + dist/*.xlsx werden regeneriert)
+│   ├── registry_new.json            # Registry-Einträge der 13 neuen Spalten
+│   └── deutschland-rohdaten.xlsx    # Release-Build (noch alter Stand, s. o.)
+│       (merged_raw_base.json entpackt + merged_raw_v3.json + dist/* werden regeneriert)
 ├── raw/                    # Downloads (.gitignore'd)
 └── dist/                   # generierte XLSX/Parquet (.gitignore'd)
 ```

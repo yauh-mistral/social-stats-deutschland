@@ -5,3 +5,7 @@ raw/
 dist/
 __pycache__/
 *.pyc
+
+# Entpackte/intermediate JSON-Basis (aus .xz.a85 bzw. merge.py erzeugt)
+data/merged_raw_base.json
+data/merged_raw_v3.json
