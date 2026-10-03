@@ -190,11 +190,11 @@ nach Prüfung des Abgleichsberichts.
 │   ├── parse_genesis.py / parse_zensus.py / parse_nsg.py
 │   └── unpack_base.py / merge.py / build_xlsx.py / export_parquet.py
 ├── data/                   # committete Daten + Registry
-│   ├── merged_raw_base.json.xz.a85  # v1-Basis, 96 Spalten (xz+Ascii85, entpacken per unpack_base.py)
-│   ├── genesis_neu.json             # GENESIS-Spalten je AGS (10 Spalten inkl. mig)
-│   ├── mig_zensus.json              # Zensus-Migrationswerte je AGS (1000A-1011)
-│   ├── nsg_je_kreis.json            # NSG-Spalten je AGS + Validierungs-Metadaten
-│   ├── registry_new.json            # Registry-Einträge der 13 neuen Spalten
+│   ├── merged_raw_base.json.xz.a85  # v1-Basis: 96 Spalten je AGS inkl. Registry-Metadaten (eingefrorener Stand, entpacken per unpack_base.py)
+│   ├── genesis_neu.json             # 8 GENESIS-Spalten + 2 abgeleitete + 2 mig-Spalten (per parse_zensus aus mig_zensus.json eingearbeitet)
+│   ├── mig_zensus.json              # Zensus-Rohwerte je AGS (Tabelle 1000A-1011; committete Ersatzquelle, da die Zensus-API derzeit 404 liefert)
+│   ├── nsg_je_kreis.json            # 3 NSG-Spalten je AGS (BfN-WFS + VG250-Raster) + Validierungs-Metadaten (meta-Block)
+│   ├── registry_new.json            # Registry-Metadaten der 13 neuen Spalten (10 aus genesis_neu + 3 aus nsg_je_kreis)
 │   ├── deutschland-rohdaten.xlsx    # Release-Build (GitHub Actions hält ihn aktuell)
 │   ├── deutschland-rohdaten.parquet # Release (R-Analyse, 400 x 109)
 │   └── deutschland-variablen.parquet # Release (Registry, 109 Eintraege)
@@ -202,6 +202,21 @@ nach Prüfung des Abgleichsberichts.
 ├── raw/                    # Downloads (.gitignore'd)
 └── dist/                   # generierte XLSX/Parquet (.gitignore'd)
 ```
+
+### Warum eine Wertedatei je Quelle?
+
+Die Spaltenzuwächse liegen bewusst **getrennt je Datenquelle** statt in
+einer gemeinsamen Datei — GENESIS (jährliche Tabellen), Zensus 2022
+(final) und BfN-WFS (Rebuild nur mit 106 MB Rohdaten) haben
+unterschiedliche Aktualisierungszyklen. So bleibt jeder Teilrebuild
+klein (z. B. nur `parse_genesis.py` anfassen, ohne NSG-Rohdaten), und
+die Prüfzahlen liegen direkt bei den Daten (`checks` in
+`genesis_neu.json`, `meta` in `nsg_je_kreis.json`). Konsolidiert wird
+erst in `merge.py` — auf Metadatenebene bereits in `registry_new.json`,
+das alle 13 neuen Spalten unabhängig von ihrer Herkunft vereint.
+
+Arithmetik: 96 (Basis) + 10 (GENESIS/Zensus) + 3 (BfN) = 109 Spalten;
+Registry: 96 in der Basis eingebettet + 13 in `registry_new.json` = 109.
 
 ## Automatischer Release-Build (GitHub Actions)
 

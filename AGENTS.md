@@ -93,6 +93,10 @@ Kontext laden, bevor Skripte geändert werden.
   `data/` ist committet und zugleich Quelle der Wahrheit für den XLSX-Build.
 - Der Join-Schlüssel ist immer `rs`, 5-stellig, als **String**
   (führende Nullen!).
+- **Eine Wertedatei je Datenquelle** (Basis/GENESIS/Zensus/BfN getrennt):
+  unterschiedliche Aktualisierungszyklen, kleine Teilrebuilds, Prüfzahlen
+  je Datei. Neue Quelle → eigene Datei in `data/` + Registry-Einträge
+  in `registry_new.json`; gemergt wird erst in `merge.py`.
 - Quellen-Dokumentation zweistufig: Das README bleibt auf
   Herausgeber-Ebene generisch (BBSR, Destatis, BKA, BfN, …); die
   konkrete Tabelle je Spalte (Nummer, Erhebungsstand, Link,
