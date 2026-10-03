@@ -113,5 +113,19 @@ PROFILES <- list(
       umwelt      = 2.0,   # Erholung, NSG, Wald: Kern des Profils
       gemeinschaft = 1.5
     )
+  ),
+  urban_kompakt = list(
+    label = "Beste Lebensqualitaet fuer Bestandswohner in kompakten Staedten (Versorgung + Gruen)",
+    weights = c(
+      einkommen   = 0.5,   # niedrige Wohnkosten wirken teilweise dem Einkommen entgegen
+      wohnen      = 1.0,
+      arbeit      = 0.25,  # Arbeitsmarkt schwaecher gewichtet
+      gesundheit  = 1.5,   # Aerzte/KH-Betten je EW: Staerken kompakter Staedte
+      kinder      = 0.5,
+      bildung     = 0.5,
+      sicherheit  = 0.25,  # Kriminalitaet bewusst nieder-gewichtet
+      umwelt      = 1.5,   # Erholungsflaeche/NSG: Gruen in der Stadt
+      gemeinschaft = 0.5
+    )
   )
 )
