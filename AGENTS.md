@@ -93,6 +93,13 @@ Kontext laden, bevor Skripte geändert werden.
   `data/` ist committet und zugleich Quelle der Wahrheit für den XLSX-Build.
 - Der Join-Schlüssel ist immer `rs`, 5-stellig, als **String**
   (führende Nullen!).
+- **Karte (`site/`) ist reiner Consumer**: keine Werte im Frontend
+  hardcodieren; alle Daten kommen aus `_site/data/map_data.json`.
+  Geometrie nie committen — sie wird in der CI aus der VG250
+  vereinfacht (`src/build_map.py`, stdlib-only). BKG-Attribution
+  „© GeoBasis-DE / BKG“ ist auf der Karte Pflicht (GeoNutzV).
+  Ranglisten: Platz 1 = höchster Wert, keine Polaritäts-Bewertung
+  (bewusst, MVP-Entscheid).
 - **Eine Wertedatei je Datenquelle** (Basis/GENESIS/Zensus/BfN getrennt):
   unterschiedliche Aktualisierungszyklen, kleine Teilrebuilds, Prüfzahlen
   je Datei. Neue Quelle → eigene Datei in `data/` + Registry-Einträge

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deutschland im Überblick — Kreiskarte</title>
+<meta name="description" content="Interaktive Choroplethen-Karte: 109 amtliche Variablen für alle 400 Landkreise und kreisfreien Städte.">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="topbar">
+  <div>
+    <h1>Deutschland im Überblick</h1>
+    <p id="subtitle">109 Variablen · 400 Kreise · <a id="src-link" target="_blank" rel="noopener">Quelle</a> · Stand <span id="src-stand"></span></p>
+  </div>
+  <div id="current-var">
+    <div id="current-label">…</div>
+    <div id="current-meta"></div>
+  </div>
+</header>
+
+<div id="layout">
+  <aside id="sidebar">
+    <p class="hint">Themenblock wählen, dann Variable:</p>
+    <nav id="blocks"></nav>
+  </aside>
+
+  <main id="mapwrap">
+    <div id="map"></div>
+    <div id="legend" class="panel">
+      <div id="legend-title"></div>
+      <div id="legend-rows"></div>
+      <div id="legend-note">Klassengrenzen: Quintile der 400 Kreise</div>
+    </div>
+    <div id="detail" class="panel" hidden></div>
+  </main>
+</div>
+
+<footer id="map-footer">
+  Daten: siehe Registry im <a href="https://github.com/yauh-mistral/social-stats-deutschland" target="_blank" rel="noopener">Repository</a> ·
+  Kreisgrenzen: vereinfachte Darstellung, © GeoBasis-DE / BKG (VG250) ·
+  Platz 1 = höchster Wert, keine Bewertung als „gut“ oder „schlecht“
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

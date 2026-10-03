@@ -199,9 +199,14 @@ nach Prüfung des Abgleichsberichts.
 │   ├── deutschland-rohdaten.parquet # Release (R-Analyse, 400 x 109)
 │   └── deutschland-variablen.parquet # Release (Registry, 109 Eintraege)
 │       (merged_raw_base.json entpackt + merged_raw_v3.json + dist/* werden regeneriert)
+├── site/                   # Karten-Frontend (GitHub Pages, siehe unten)
+│   ├── index.html / style.css / app.js
+│   └── data/ (generiert: map_data.json + kreise.geo.json, siehe unten)
 ├── raw/                    # Downloads (.gitignore'd)
 └── dist/                   # generierte XLSX/Parquet (.gitignore'd)
 ```
+
+`_site/` (Pages-Build-Artefakt) wird in der CI erzeugt und nie committet.
 
 ### Warum eine Wertedatei je Quelle?
 
@@ -237,6 +242,36 @@ und baut aus den committeten Basisdateien die drei Release-Artefakte
 Benötigt nur `openpyxl` + `pyarrow` (in der Action installiert) —
 die Kernpipeline kommt ohne numpy aus. Auch manuell startbar:
 *Actions → Build XLSX + Parquet → Run workflow*.
+
+## Interaktive Karte (GitHub Pages)
+
+`site/` enthält eine Choroplethen-Karte aller 109 Variablen für die
+400 Kreise (Leaflet via CDN, keine Build-Tools). Der Workflow
+`.github/workflows/pages.yml` deployt sie bei jedem Push auf `main`,
+der `data/`, `src/` oder `site/` berührt:
+
+- **Daten**: Pipeline-Verifikation läuft mit (`merge.py`-Assertions),
+  dann schreibt `src/build_map.py` `_site/data/map_data.json`
+  (Werte + Registry-Metadaten inkl. Themenblock).
+- **Geometrie**: `fetch_vg250.py` (67 MB, BKG) → `build_map.py` liest
+  VG250_KRS, projiziert UTM 32N → WGS84, vereinfacht per
+  Douglas-Peucker (~150 m, ~2 MB GeoJSON) und verifiziert den
+  rs-Join (400 ↔ 400). Alles Standardbibliothek — kein pip, kein npm.
+- **Bedienung**: Themenblock wählen → Variable wählen; Hover zeigt
+  Kreis + Wert, Klick öffnet die Kreis-Detailansicht mit **fünf
+  Spitzen- und fünf Schlussplätzen** über alle numerischen Variablen
+  (keine vollständigen Ranglisten). Platz 1 = höchster Wert —
+  bewusst ohne Bewertung als „gut“/„schlecht“; eine
+  Polaritäts-Konfiguration je Variable wäre ein mögliches Upgrade.
+- **Klassifizierung**: Quintile der 400 Kreise (5 Klassen) —
+  Kreisverteilungen sind stark schief, Linear-Skalen würden
+  visuell fast alles in eine Klasse legen.
+- **Attribution**: Kreisgrenzen © GeoBasis-DE / BKG (GeoNutzV),
+  sichtbar auf der Karte und im Footer.
+
+**Einmalige Aktivierung** (nicht per API machbar): *Settings →
+Pages → Source: „GitHub Actions“*. Danach:
+`https://<owner>.github.io/social-stats-deutschland/`
 
 ## Join-Schlüssel
 

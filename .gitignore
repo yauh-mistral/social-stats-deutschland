@@ -9,3 +9,6 @@ __pycache__/
 # Entpackte/intermediate JSON-Basis (aus .xz.a85 bzw. merge.py erzeugt)
 data/merged_raw_base.json
 data/merged_raw_v3.json
+
+# Pages-Build (wird in der CI erzeugt, nie committen)
+_site/
