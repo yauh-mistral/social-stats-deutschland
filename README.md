@@ -266,6 +266,14 @@ der `data/`, `src/` oder `site/` berührt:
 - **Klassifizierung**: Quintile der 400 Kreise (5 Klassen) —
   Kreisverteilungen sind stark schief, Linear-Skalen würden
   visuell fast alles in eine Klasse legen.
+- **Geteilte Plätze**: Gleiche Werte bekommen den gleichen Rang
+  (Competition Ranking). Die Detailansicht weist geteilte Werte aus
+  („Wert mit 122 weiteren Kreisen geteilt“), und Werte, die 10 oder
+  mehr Kreise teilen, gelten nicht als Spitzen-/Schlussplatz —
+  das sind strukturelle Cluster (z. B. 123 Städte mit
+  Urbanisierungsquote 100 %), keine individuelle Platzierung.
+  Der Schwellwert liegt in einer Datellücke: größter „echter“
+  Cluster 8 Kreise, kleinster struktureller 15.
 - **Attribution**: Kreisgrenzen © GeoBasis-DE / BKG (GeoNutzV),
   sichtbar auf der Karte und im Footer.
 

@@ -99,7 +99,10 @@ Kontext laden, bevor Skripte geändert werden.
   vereinfacht (`src/build_map.py`, stdlib-only). BKG-Attribution
   „© GeoBasis-DE / BKG“ ist auf der Karte Pflicht (GeoNutzV).
   Ranglisten: Platz 1 = höchster Wert, keine Polaritäts-Bewertung
-  (bewusst, MVP-Entscheid).
+  (bewusst, MVP-Entscheid). Geteilte Ränge sind Competition-Ranking;
+  Werte mit >= 10 Kreisen sind strukturelle Cluster und werden NICHT
+  als Spitzen-/Schlussplatz gelistet (TIE_MAX in site/app.js,
+  Datellücke: echter Maximal-Cluster 8, struktureller ab 15).
 - **Eine Wertedatei je Datenquelle** (Basis/GENESIS/Zensus/BfN getrennt):
   unterschiedliche Aktualisierungszyklen, kleine Teilrebuilds, Prüfzahlen
   je Datei. Neue Quelle → eigene Datei in `data/` + Registry-Einträge

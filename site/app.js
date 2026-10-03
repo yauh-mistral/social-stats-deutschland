@@ -16,6 +16,12 @@
 
 var EXCLUDE_SELECTOR = ["rs", "name", "type", "bl", "ost", "name_vgrdl"];
 var EXCLUDE_RANKING = ["ost"];
+/* Strukturelle Wert-Cluster: Teilen 10 oder mehr Kreise denselben Wert,
+ * ist das eine Kategorie (z. B. 123 Staedte mit urb=100 %, 124 Kreise mit
+ * ko_kasskred=0), kein individueller Spitzen-/Schlussplatz. Der Schwellwert
+ * liegt in einer echten Datelluecke: groesster "echter" Cluster 8
+ * (wohn_EZFH), kleinster struktureller 15 (NSG-Nullwerte). */
+var TIE_MAX = 10;
 var DEFAULT_VAR = "verfeink_je_ew";
 var CLASS_COLORS = ["#f1f5fa", "#c6dbef", "#6baed6", "#3182bd", "#08519c"];
 var NO_DATA_COLOR = "#cfd4da";
@@ -74,16 +80,18 @@ function classify(value, breaks) {
 }
 
 function rankOf(rows, key, x) {
-  // Rang: 1 + Anzahl streng groesserer Werte (gleiche Werte gleicher Rang)
+  // Rang: 1 + Anzahl streng groesserer Werte (gleiche Werte gleicher Rang,
+  // Standard-Competition-Ranking). ties = Zahl der Kreise mit demselben Wert.
   if (typeof x !== "number") return null;
-  var rank = 1, n = 0;
+  var rank = 1, n = 0, ties = 0;
   rows.forEach(function (r) {
     if (typeof r[key] === "number") {
       n++;
       if (r[key] > x) rank++;
+      if (r[key] === x) ties++;
     }
   });
-  return { rank: rank, n: n };
+  return { rank: rank, n: n, ties: ties };
 }
 
 function topFlopPlacements(columns, rows, rs, count) {
@@ -96,10 +104,13 @@ function topFlopPlacements(columns, rows, rs, count) {
   numericColumns(columns, rows).forEach(function (c) {
     if (EXCLUDE_RANKING.indexOf(c.key) >= 0) return;
     var res = rankOf(rows, c.key, row[c.key]);
-    if (res && res.n >= 50) {  // Variablen mit fast nur Nullwerten skippen
+    if (res && res.n >= 50 && res.ties < TIE_MAX) {
+      // n >= 50: Variablen mit fast nur Nullwerten skippen
+      // ties < TIE_MAX: strukturelle Cluster sind keine Platzierung
       entries.push({
         key: c.key, label: byLabel[c.key], value: row[c.key],
-        rank: res.rank, n: res.n, ratio: res.rank / res.n
+        rank: res.rank, n: res.n, ties: res.ties,
+        ratio: res.rank / res.n
       });
     }
   });
@@ -223,6 +234,12 @@ function initBrowser() {
     var c = col(state.varKey);
     var res = rankOf(state.rows, state.varKey, row[state.varKey]);
     var tf = topFlopPlacements(state.columns, state.rows, rs, 5);
+    var tieNote = "";
+    if (res && res.ties > 1) {
+      tieNote = ' <span style="color:var(--muted)">— Wert mit ' +
+        (res.ties - 1) + " weiteren " + (res.ties === 2 ? "Kreis" : "Kreisen") +
+        " geteilt</span>";
+    }
 
     var placeRows = function (list, cssClass) {
       return list.map(function (e) {
@@ -242,14 +259,15 @@ function initBrowser() {
       (typeof row[state.varKey] === "number" ? fmtNum(row[state.varKey]) : "kein Wert") +
       (c.einheit ? " " + c.einheit : "") +
       (res ? ' &nbsp;·&nbsp; <b>Platz ' + res.rank + " von " + res.n + "</b>" : "") +
-      "</div>" +
+      tieNote + "</div>" +
       "<h3>Spitzenplätze — häufig vorn</h3>" +
       '<ul class="placement-list">' + placeRows(tf.top, "top") + "</ul>" +
       "<h3>Schlussplätze — häufig hinten</h3>" +
       '<ul class="placement-list">' + placeRows(tf.flop, "flop") + "</ul>" +
-      '<div class="note">Über alle ' +
-      (tf.top.length ? "numerischen Variablen" : "Variablen") +
-      "; Platz 1 = höchster Wert je Variable — keine Bewertung als „gut“ oder „schlecht“.</div>";
+      '<div class="note">Über alle numerischen Variablen; Platz 1 = höchster ' +
+      "Wert je Variable — keine Bewertung als „gut“ oder „schlecht“. " +
+      "Werte, die 10 oder mehr Kreise teilen (z.&nbsp;B. Urbanisierungsquote " +
+      "100&nbsp;% in Städten), gelten nicht als Spitzen-/Schlussplatz.</div>";
     el.hidden = false;
     el.querySelector(".close").addEventListener("click", function () {
       el.hidden = true;
