@@ -1,0 +1,106 @@
+{
+ "krankenhaeuser": {
+  "label": "Krankenhäuser",
+  "einheit": "Anzahl",
+  "quelle": "Statistisches Bundesamt, GENESIS-Online Tabelle 23111-01-05-4-B (Grunddaten der Krankenhäuser)",
+  "jahr": "31.12.2024",
+  "link": "https://www.regionalstatistik.de/genesisws/downloader/00/tables/23111-01-05-4-B_00.csv",
+  "anmerkung": "Anzahl der Krankenhäuser je Kreis; Summe über 400 Kreise: 1.841"
+ },
+ "betten": {
+  "label": "Krankenhausbetten",
+  "einheit": "Anzahl",
+  "quelle": "Statistisches Bundesamt, GENESIS-Online Tabelle 23111-01-05-4-B (Grunddaten der Krankenhäuser)",
+  "jahr": "31.12.2024",
+  "link": "https://www.regionalstatistik.de/genesisws/downloader/00/tables/23111-01-05-4-B_00.csv",
+  "anmerkung": "Installierte Betten je Kreis; Summe über 400 Kreise: 472.851"
+ },
+ "betten_100k": {
+  "label": "Krankenhausbetten je 100.000 Einwohner",
+  "einheit": "je 100.000 EW",
+  "quelle": "eigene Berechnung (betten ÷ pop × 100.000)",
+  "jahr": "31.12.2024",
+  "link": "https://www.regionalstatistik.de/genesisws/downloader/00/tables/23111-01-05-4-B_00.csv",
+  "anmerkung": "100.000-Einwohner-Rate aus betten und pop"
+ },
+ "schulen_anzahl": {
+  "label": "Schulen (Anzahl)",
+  "einheit": "Anzahl",
+  "quelle": "Statistisches Bundesamt, GENESIS-Online Tabelle 21111-01-03-4-B (Allgemeinbildende und berufliche Schulen)",
+  "jahr": "Schuljahr 2023/24",
+  "link": "https://www.regionalstatistik.de/genesisws/downloader/00/tables/21111-01-03-4-B_00.csv",
+  "anmerkung": "Anzahl der Schulanlagen (Schulstandorte) je Kreis; Summe der Schularten ohne Vorschulbereich; Summe über 400 Kreise: 30.604"
+ },
+ "schulen_100k": {
+  "label": "Schulen je 100.000 Einwohner",
+  "einheit": "je 100.000 EW",
+  "quelle": "eigene Berechnung (schulen_anzahl ÷ pop × 100.000)",
+  "jahr": "Schuljahr 2023/24",
+  "link": "https://www.regionalstatistik.de/genesisws/downloader/00/tables/21111-01-03-4-B_00.csv",
+  "anmerkung": "100.000-Einwohner-Rate aus schulen_anzahl und pop"
+ },
+ "flaeche_km2": {
+  "label": "Kreisfläche",
+  "einheit": "km²",
+  "quelle": "Statistisches Bundesamt, GENESIS-Online Tabelle 33111-01-02-4 (Bodenfläche nach Art der tatsächlichen Nutzung)",
+  "jahr": "31.12.2021",
+  "link": "https://www.regionalstatistik.de/genesisws/downloader/00/tables/33111-01-02-4_00.csv",
+  "anmerkung": "Bodenfläche gesamt je Kreis (inkl. Siedlungs-, Verkehrs- und Wasserfläche); Summe über 400 Kreise: 357.586 km² (99,998 % des amtlichen Wertes)"
+ },
+ "wasserflaeche_prozent": {
+  "label": "Wasserflächenanteil",
+  "einheit": "% der Kreisfläche",
+  "quelle": "Statistisches Bundesamt, GENESIS-Online Tabelle 33111-01-02-4 (Bodenfläche nach Art der tatsächlichen Nutzung)",
+  "jahr": "31.12.2021",
+  "link": "https://www.regionalstatistik.de/genesisws/downloader/00/tables/33111-01-02-4_00.csv",
+  "anmerkung": "Wasserfläche gesamt ÷ Bodenfläche; Proxy für Küsten-, Seen- und Flussnähe"
+ },
+ "erholungsflaeche_prozent": {
+  "label": "Erholungsflächenanteil",
+  "einheit": "% der Kreisfläche",
+  "quelle": "Statistisches Bundesamt, GENESIS-Online Tabelle 33111-02-01-4 (Erholungsfläche: Grundfläche)",
+  "jahr": "31.12.2021",
+  "link": "https://www.regionalstatistik.de/genesisws/downloader/00/tables/33111-02-01-4_00.csv",
+  "anmerkung": "Erholungsfläche (Grundfläche) ÷ Bodenfläche"
+ },
+ "nsg_anzahl": {
+  "label": "Naturschutzgebiete (Anzahl)",
+  "einheit": "Anzahl",
+  "quelle": "Bundesamt für Naturschutz, WFS Dienst schutzgebiet/Naturschutzgebiete",
+  "jahr": "03.10.2026",
+  "link": "https://geodienste.bfn.de/ogc/wfs/schutzgebiet",
+  "anmerkung": "Anzahl der NSG mit Flächenanteil im Kreis (9.035 Gebiete bundesweit im Dienst)"
+ },
+ "nsg_ha": {
+  "label": "Naturschutzgebiete (Fläche)",
+  "einheit": "ha",
+  "quelle": "Bundesamt für Naturschutz, WFS Dienst schutzgebiet/Naturschutzgebiete; Zuordnung gegen BKG VG250 Kreisgrenzen (31.12.2024)",
+  "jahr": "03.10.2026",
+  "link": "https://geodienste.bfn.de/ogc/wfs/schutzgebiet",
+  "anmerkung": "NSG-Fläche innerhalb der Kreisgrenzen; Zuordnung per 100-m-Raster (Ringe ≥ 500 ha) bzw. Schwerpunktzuordnung kleinerer Gebiete; gesamt 2,75 Mio ha, davon 1,50 Mio ha innerhalb der Kreisflächen zugewiesen; Meeres-/AWZ-Anteile bleiben unberücksichtigt; geringe Randunschärfe an Kreisgrenzen (Rasterauflösung 1 ha)"
+ },
+ "nsg_anteil_prozent": {
+  "label": "Naturschutzgebiete (Anteil Kreisfläche)",
+  "einheit": "% der Kreisfläche",
+  "quelle": "BfN-WFS Naturschutzgebiete; eigene Berechnung (nsg_ha ÷ flaeche_km2)",
+  "jahr": "03.10.2026",
+  "link": "https://geodienste.bfn.de/ogc/wfs/schutzgebiet",
+  "anmerkung": "nsg_ha ÷ (flaeche_km2 × 100 ha) × 100; 385 von 400 Kreisen haben mind. ein NSG"
+ },
+ "mig_eingewandert": {
+  "label": "Eigenes Zugehen: selbst Eingewanderte",
+  "einheit": "% der Bevölkerung",
+  "quelle": "Statistisches Bundesamt, Zensus 2022, Ergebnistabelle 1000A-1011 (Wohnbevölkerung nach Einwanderung)",
+  "jahr": "15.05.2022",
+  "link": "https://ergebnisse.zensus2022.de/",
+  "anmerkung": "Anteil der Bevölkerung, die selbst zugewandert ist bzw. im Ausland geboren wurde (Zensus-Kategorie \"Eingewanderte\"); Deutschland gesamt: 18,8 %"
+ },
+ "mig_geschichte": {
+  "label": "Einwanderungsgeschichte",
+  "einheit": "% der Bevölkerung",
+  "quelle": "Statistisches Bundesamt, Zensus 2022, Ergebnistabelle 1000A-1011 (Wohnbevölkerung nach Einwanderung)",
+  "jahr": "15.05.2022",
+  "link": "https://ergebnisse.zensus2022.de/",
+  "anmerkung": "100 % minus Bevölkerung \"ohne Einwanderungsgeschichte\"; Nachfolgegröße des bisherigen \"Migrationshintergrunds\" (schließt eigene Zuwanderung und direkten Bezug ein); Deutschland gesamt: 23,6 %"
+ }
+}
