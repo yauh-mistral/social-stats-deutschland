@@ -1,0 +1,7 @@
+# Rohdaten-Downloads (106 MB WFS, VG250-Zip, GENESIS-CSVs)
+raw/
+
+# Generierte Artefakte
+dist/
+__pycache__/
+*.pyc
