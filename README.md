@@ -22,8 +22,8 @@ Quellabruf (GENESIS / Zensus / BfN / BKG) → Parsing → Merge → XLSX-Build.
   (`.github/workflows/build-xlsx.yml`): bei jedem Push auf `main` läuft
   die Pipeline mit ihren Prüfzahlen-Assertions, liest die Parquets zur
   Verifikation zurück und der Bot committet bei inhaltlicher Änderung.
-  Lokal goes weiterhin manuell (s. „Kompletter Rebuild“); `dist/` bleibt
-  das lokale Ausgabeverzeichnis und ist gitignored.
+  Lokal geht es weiterhin manuell (s. „Kompletter Rebuild“); `dist/` bleibt
+  das lokale Ausgabeverzeichnis (Default der Skripte) und ist gitignored.
 
 ### Spaltenblöcke
 
@@ -43,16 +43,19 @@ Quellabruf (GENESIS / Zensus / BfN / BKG) → Parsing → Merge → XLSX-Build.
 ## Pipeline
 
 ```
-raw/ (Downloads, .gitignore'd)         data/ (committet)
+raw/ (Downloads, .gitignore'd)         data/ (committete Basisdateien)
 -----------------------------------   ------------------------------------
 fetch_genesis.py   -> raw/genesis/    parse_genesis.py  -> genesis_neu.json
 fetch_zensus.py    -> raw/zensus/     parse_zensus.py   -> (mig-Spalten)
 fetch_nsg.py       -> raw/nsg/        parse_nsg.py      -> nsg_je_kreis.json
 fetch_vg250.py     -> raw/vg250/
                                       merge.py  -> merged_raw_v3.json
-                                      build_xlsx.py -> dist/deutschland-rohdaten.xlsx
-                                      export_parquet.py -> dist/*.parquet (R-Analyse)
-                                      [CI] build_xlsx.py + export_parquet.py -> data/*.xlsx, data/*.parquet
+                                        (Zwischenstand, gitignored)
+                                      build_xlsx.py     -> dist/*.xlsx  (lokale Ausgabe)
+                                      export_parquet.py -> dist/*.parquet (lokale Ausgabe)
+                                      GitHub Action (Release):
+                                        build_xlsx.py + export_parquet.py nach data/
+                                        -> data/*.xlsx, data/*.parquet (committet)
 ```
 
 Alles läuft mit Python 3 + NumPy + openpyxl
@@ -68,8 +71,8 @@ python3 src/fetch_genesis.py    # 4 GENESIS-CSVs (~1 MB)        [optional, data/
 python3 src/parse_genesis.py    # Validierung: KH 1.841, Betten 472.851, ...
 python3 src/parse_zensus.py    # mig-Spalten (aus data/mig_zensus.json; s. u.)
 python3 src/merge.py            # 109 Spalten, Prüfzahlen-Assertions
-python3 src/build_xlsx.py       # dist/deutschland-rohdaten.xlsx
-python3 src/export_parquet.py   # dist/*.parquet (benötigt pyarrow)
+python3 src/build_xlsx.py       # dist/deutschland-rohdaten.xlsx (lokale Ausgabe)
+python3 src/export_parquet.py   # dist/*.parquet (benötigt pyarrow; lokale Ausgabe)
 # Release nach data/ (macht sonst die Action):
 #   python3 src/build_xlsx.py data/deutschland-rohdaten.xlsx
 #   python3 src/export_parquet.py data/deutschland-rohdaten.xlsx data
@@ -192,9 +195,9 @@ nach Prüfung des Abgleichsberichts.
 │   ├── mig_zensus.json              # Zensus-Migrationswerte je AGS (1000A-1011)
 │   ├── nsg_je_kreis.json            # NSG-Spalten je AGS + Validierungs-Metadaten
 │   ├── registry_new.json            # Registry-Einträge der 13 neuen Spalten
-│   ├── deutschland-rohdaten.xlsx      # Release (GitHub Actions hält ihn aktuell)
-│   ├── deutschland-rohdaten.parquet   # Release (R-Analyse, 400 x 109)
-│   └── deutschland-variablen.parquet  # Release (Registry, 109 Eintraege)
+│   ├── deutschland-rohdaten.xlsx    # Release-Build (GitHub Actions hält ihn aktuell)
+│   ├── deutschland-rohdaten.parquet # Release (R-Analyse, 400 x 109)
+│   └── deutschland-variablen.parquet # Release (Registry, 109 Eintraege)
 │       (merged_raw_base.json entpackt + merged_raw_v3.json + dist/* werden regeneriert)
 ├── raw/                    # Downloads (.gitignore'd)
 └── dist/                   # generierte XLSX/Parquet (.gitignore'd)
