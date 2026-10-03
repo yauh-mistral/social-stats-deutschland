@@ -276,6 +276,10 @@ der `data/`, `src/` oder `site/` berührt:
   Cluster 8 Kreise, kleinster struktureller 15.
 - **Attribution**: Kreisgrenzen © GeoBasis-DE / BKG (GeoNutzV),
   sichtbar auf der Karte und im Footer.
+- **Analytics**: selbst gehostetes, cookiefreies Shynet
+  (`analytics.islanublar.de`, Snippet in `site/index.html`) — keine
+  Cookies, keine personenbezogenen Profile; im Footer transparent
+  ausgewiesen.
 
 **Einmalige Aktivierung** (nicht per API machbar): *Settings →
 Pages → Source: „GitHub Actions“*. Danach:

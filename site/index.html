@@ -7,6 +7,8 @@
 <meta name="description" content="Interaktive Choroplethen-Karte: 109 amtliche Variablen für alle 400 Landkreise und kreisfreien Städte.">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="style.css">
+<!-- Shynet-Analytics: selbst gehostet, cookiefrei (analytics.islanublar.de) -->
+<script defer src="https://analytics.islanublar.de/ingress/51d2803f-5796-492c-83f3-8aee56769eff/script.js"></script>
 </head>
 <body>
 <header id="topbar">
@@ -40,10 +42,14 @@
 <footer id="map-footer">
   Daten: siehe Registry im <a href="https://github.com/yauh-mistral/social-stats-deutschland" target="_blank" rel="noopener">Repository</a> ·
   Kreisgrenzen: vereinfachte Darstellung, © GeoBasis-DE / BKG (VG250) ·
-  Platz 1 = höchster Wert, keine Bewertung als „gut“ oder „schlecht“
+  Platz 1 = höchster Wert, keine Bewertung als „gut“ oder „schlecht“ ·
+  Cookiefreies, selbst gehostetes Analytics (Shynet)
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="app.js"></script>
+<noscript>
+    <img src="https://analytics.islanublar.de/ingress/51d2803f-5796-492c-83f3-8aee56769eff/pixel.gif" alt="">
+</noscript>
 </body>
 </html>
