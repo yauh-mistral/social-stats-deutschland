@@ -43,6 +43,7 @@ fetch_nsg.py       -> raw/nsg/        parse_nsg.py      -> nsg_je_kreis.json
 fetch_vg250.py     -> raw/vg250/
                                       merge.py  -> merged_raw_v3.json
                                       build_xlsx.py -> dist/deutschland-rohdaten.xlsx
+                                      export_parquet.py -> dist/*.parquet (R-Analyse)
 ```
 
 Alles läuft mit Python 3 + NumPy + openpyxl (`pip install numpy openpyxl`).
@@ -58,6 +59,7 @@ python3 src/parse_genesis.py    # Validierung: KH 1.841, Betten 472.851, ...
 python3 src/parse_nsg.py        # Raster-Zuordnung (s. u.)
 python3 src/merge.py            # 109 Spalten, Prüfzahlen-Assertions
 python3 src/build_xlsx.py       # dist/deutschland-rohdaten.xlsx
+python3 src/export_parquet.py   # dist/deutschland-rohdaten.parquet + variablen.parquet
 ```
 
 Da die Rohdaten groß sind, sind die Zwischenergebnisse in `data/`
@@ -142,7 +144,7 @@ GENESIS-Bodenfläche — zum Kreisgebiet (z. B. Nordfriesland groß).
 │   └── registry_new.json            # Registry-Einträge der 13 neuen Spalten
 │       (merged_raw_v3.json + dist/*.xlsx werden regeneriert)
 ├── raw/                    # Downloads (.gitignore'd)
-└── dist/                   # generierte XLSX (.gitignore'd)
+└── dist/                   # generierte XLSX/Parquet (.gitignore'd)
 ```
 
 ## Join-Schlüssel
