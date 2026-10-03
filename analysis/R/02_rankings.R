@@ -17,7 +17,7 @@ dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 for (p in names(PROFILES)) {
   w <- PROFILES[[p]]$weights
   w <- w[w > 0]
-  stopifnot(all(names(w) %in% names(DIMENSIONS)))
+  stopifnot(all(names(w) %in% names(ALL_DIMENSIONS)))
   w_norm <- w / sum(w)
   score <- rep(NA_real_, nrow(kreise))
   for (d in names(w_norm)) {

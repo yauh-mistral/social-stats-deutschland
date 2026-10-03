@@ -53,6 +53,73 @@ DIMENSIONS <- list(
 )
 
 # ---------------------------------------------------------------------------
+# OECD Regional Well-Being (9 Dimensionen) — Nachbau mit vorhandenen Daten.
+# Blaupause: OECD Regional Well-Being / Better Life Index (11 Dimensionen;
+# 'Life Satisfaction' und 'Work-Life-Balance' sind ohne Umfragedaten nicht
+# abbildbar und entfallen; 'Health'/'Environment' laufen ueber Versorgungs-
+# bzw. Landnutzungs-Proxies — das ist ausdrücklich schwächer als die
+# OECD-Originale (Lebenserwartung, PM2.5) und als solches zu deklarieren.
+# ---------------------------------------------------------------------------
+OECD_DIMENSIONS <- list(
+  income = c(
+    verfeink_je_ew = 1,
+    hh_veink       = 1,
+    kaufkraft_proxy = 1
+  ),
+  jobs = c(
+    alq        = -1,
+    erw_wachs  = 1
+  ),
+  housing = c(
+    wohnflaeche_je_bewohner = 1,
+    preisindex_wohnraum     = -1,
+    wohn_leer               = -1
+  ),
+  health = c(
+    aerz        = 1,
+    betten_100k = 1
+  ),
+  education = c(
+    bquali_mabschl = 1,
+    bquali_oabschl = -1,
+    schule_oabschl = -1
+  ),
+  environment = c(
+    erholungsflaeche_prozent = 1,
+    fl_wald                  = 1,
+    nsg_anteil_prozent       = 1
+  ),
+  safety = c(
+    gewalt_hz = -1,
+    einbr     = -1
+  ),
+  social_connections = c(
+    mitgl_sportv            = 1,
+    wahlbeteiligung_btw2025 = 1
+  ),
+  civic_engagement = c(
+    wahlbeteiligung_btw2025 = 1
+  )
+)
+
+# OECD-Profile: 9 Dimensionen gleichgewichtet (OECD published bewusst keinen
+# Gesamtscore; hier fuer die Rangfolge dennoch gleichgewichtet aggregiert).
+PROFILES$oecd <- list(
+  label = "OECD Regional Well-Being (Nachbau, 9 Dimensionen gleichgewichtet)",
+  weights = c(
+    income            = 1,
+    jobs              = 1,
+    housing           = 1,
+    health            = 1,
+    education         = 1,
+    environment       = 1,
+    safety            = 1,
+    social_connections = 1,
+    civic_engagement   = 1
+  )
+)
+
+# ---------------------------------------------------------------------------
 # Profile: Gewichte je Dimension (0 = Dimension entfaellt im Profil).
 # Die Gewichte sind begruendete Setzungen und bewusst editierbar —
 # Sensitivitaet bitte immer mitlenken (siehe 02_rankings.R).

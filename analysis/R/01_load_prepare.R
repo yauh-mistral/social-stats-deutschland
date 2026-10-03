@@ -12,6 +12,9 @@ require(dplyr)
 # ---- Konfiguration (Indikatoren, Richtungen, Profile) --------------------
 source("analysis/R/profiles_config.R")
 
+# Vereinigung der Dimensionen aus beiden Frameworks (Namen kollidieren nicht)
+ALL_DIMENSIONS <- c(DIMENSIONS, OECD_DIMENSIONS)
+
 PARQUET_RAW <- "data/deutschland-rohdaten.parquet"
 
 # ---- Laden und Validieren -------------------------------------------------
@@ -19,7 +22,7 @@ kreise_raw <- read_parquet(PARQUET_RAW)
 stopifnot(nrow(kreise_raw) == 400)
 
 # Alle konfigurierten Indikatoren muessen existieren
-all_ind <- unique(unlist(lapply(DIMENSIONS, names)))
+all_ind <- unique(unlist(lapply(ALL_DIMENSIONS, names)))
 missing <- setdiff(all_ind, names(kreise_raw))
 if (length(missing) > 0) {
   stop("Fehlende Indikatoren im Datensatz: ", paste(missing, collapse = ", "))
@@ -47,7 +50,7 @@ robust_z <- function(x) {
 # "hoeher = besser" ist danach einheitlich fuer alle standardisierten Spalten.
 z_cols <- lapply(all_ind, function(v) {
   direction <- unique(
-    vapply(DIMENSIONS, function(d) if (v %in% names(d)) d[[v]], numeric(1))
+    vapply(ALL_DIMENSIONS, function(d) if (v %in% names(d)) d[[v]], numeric(1))
   )
   stopifnot(length(direction) == 1)
   raw <- as.numeric(kreise_raw[[v]])
@@ -69,11 +72,11 @@ kreise <- cbind(as.data.frame(kreise_raw), zdf)
 # ---- Dimensionsscores ----------------------------------------------------
 # Gleichgewichtetes Mittel der z-Scores je Dimension (na.rm: robust gegen
 # einzelne fehlende Indikatoren; vollstaendige Daten hier ohnehin gegeben).
-for (dim in names(DIMENSIONS)) {
-  z_vars <- paste0("z_", names(DIMENSIONS[[dim]]))
+for (dim in names(ALL_DIMENSIONS)) {
+  z_vars <- paste0("z_", names(ALL_DIMENSIONS[[dim]]))
   kreise[[paste0("dim_", dim)]] <- rowMeans(kreise[, z_vars], na.rm = TRUE)
 }
 
 message("01_load_prepare: ", nrow(kreise), " Kreise, ",
-        length(all_ind), " Indikatoren, ", length(DIMENSIONS),
+        length(all_ind), " Indikatoren, ", length(ALL_DIMENSIONS),
         " Dimensionsscores, ", length(PROFILES), " Profile konfiguriert.")
