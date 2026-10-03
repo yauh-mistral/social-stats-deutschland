@@ -13,14 +13,16 @@ Quellabruf (GENESIS / Zensus / BfN / BKG) → Parsing → Merge → XLSX-Build.
   Themenblock je Spalte). Wird per `merge.py` erzeugt
   (`data/merged_raw_v3.json`) und ist nicht selbst committet, sondern
   aus den committeten Daten reproduzierbar.
-- **`dist/deutschland-rohdaten.xlsx`** — die fertige Mappe (2 Blätter:
-  „Rohdaten“ + „Quellen & Variablen“), regenerierbar per `build_xlsx.py`
-  (nicht committet, da Binärformat). Der committete Release-Build liegt
-  als `data/deutschland-rohdaten.xlsx` und wird **automatisch per GitHub
-  Actions** aktualisiert (`.github/workflows/build-xlsx.yml`): nach jedem
-  Push auf `main` läuft die Pipeline (entpacken → mergen → bauen) und der
-  Bot committet die XLSX, falls sich Inhalte geändert haben. Manuell geht
-  es weiterhin per `python3 src/build_xlsx.py data/deutschland-rohdaten.xlsx`.
+- **Release-Artefakte in `data/`** — `deutschland-rohdaten.xlsx`
+  (2 Blätter: „Rohdaten“ + „Quellen & Variablen“),
+  `deutschland-rohdaten.parquet` (400×109) und
+  `deutschland-variablen.parquet` (Registry) werden **automatisch per
+  GitHub Actions** aus den committeten Basisdateien gebaut
+  (`.github/workflows/build-xlsx.yml`): bei jedem Push auf `main` läuft
+  die Pipeline mit ihren Prüfzahlen-Assertions, liest die Parquets zur
+  Verifikation zurück und der Bot committet bei inhaltlicher Änderung.
+  Lokal goes weiterhin manuell (s. „Kompletter Rebuild“); `dist/` bleibt
+  das lokale Ausgabeverzeichnis und ist gitignored.
 
 ### Spaltenblöcke
 
@@ -49,11 +51,13 @@ fetch_vg250.py     -> raw/vg250/
                                       merge.py  -> merged_raw_v3.json
                                       build_xlsx.py -> dist/deutschland-rohdaten.xlsx
                                       export_parquet.py -> dist/*.parquet (R-Analyse)
+                                      [CI] build_xlsx.py + export_parquet.py -> data/*.xlsx, data/*.parquet
 ```
 
 Alles läuft mit Python 3 + NumPy + openpyxl
 (`pip install numpy openpyxl`); nur der Parquet-Export benötigt
-zusätzlich pyarrow (`pip install pyarrow`).
+zusätzlich pyarrow (`pip install pyarrow`). In der GitHub-Action
+sind beide installiert — Release-Builds brauchen lokal nichts.
 
 ### Kompletter Rebuild
 
@@ -65,6 +69,9 @@ python3 src/parse_zensus.py    # mig-Spalten (aus data/mig_zensus.json; s. u.)
 python3 src/merge.py            # 109 Spalten, Prüfzahlen-Assertions
 python3 src/build_xlsx.py       # dist/deutschland-rohdaten.xlsx
 python3 src/export_parquet.py   # dist/*.parquet (benötigt pyarrow)
+# Release nach data/ (macht sonst die Action):
+#   python3 src/build_xlsx.py data/deutschland-rohdaten.xlsx
+#   python3 src/export_parquet.py data/deutschland-rohdaten.xlsx data
 ```
 
 Nur für einen NSG-Neuaufbau zusätzlich: `fetch_vg250.py` (BKG, ~30 MB),
@@ -173,20 +180,33 @@ nach Prüfung des Abgleichsberichts.
 │   ├── mig_zensus.json              # Zensus-Migrationswerte je AGS (1000A-1011)
 │   ├── nsg_je_kreis.json            # NSG-Spalten je AGS + Validierungs-Metadaten
 │   ├── registry_new.json            # Registry-Einträge der 13 neuen Spalten
-│   └── deutschland-rohdaten.xlsx    # Release-Build (GitHub Actions hält ihn aktuell)
+│   ├── deutschland-rohdaten.xlsx      # Release (GitHub Actions hält ihn aktuell)
+│   ├── deutschland-rohdaten.parquet   # Release (R-Analyse, 400 x 109)
+│   └── deutschland-variablen.parquet  # Release (Registry, 109 Eintraege)
 │       (merged_raw_base.json entpackt + merged_raw_v3.json + dist/* werden regeneriert)
 ├── raw/                    # Downloads (.gitignore'd)
 └── dist/                   # generierte XLSX/Parquet (.gitignore'd)
 ```
 
-## Automatischer XLSX-Build (GitHub Actions)
+## Automatischer Release-Build (GitHub Actions)
 
-`.github/workflows/build-xlsx.yml` baut nach jedem Push auf `main`
-(Pfade `data/**`, `src/**`, Workflow selbst) die `data/deutschland-rohdaten.xlsx`
-aus den committeten Basisdateien und committet sie bei inhaltlicher
-Änderung (`chore(data): … [skip ci]`, Bot-Identität). Benötigt nur
-`openpyxl` — die Kernpipeline kommt ohne numpy aus. Auch manuell
-startbar: *Actions → Build XLSX → Run workflow*.
+`.github/workflows/build-xlsx.yml` läuft **bei jedem Push auf `main`**
+und baut aus den committeten Basisdateien die drei Release-Artefakte
+`data/deutschland-rohdaten.xlsx`, `data/deutschland-rohdaten.parquet`,
+`data/deutschland-variablen.parquet`:
+
+1. Pipeline: `unpack_base.py` → `parse_zensus.py` → `merge.py` →
+   `build_xlsx.py` — mit Assertions gegen amtliche Prüfzahlen
+   (KH 1.841, Betten 472.851, NSG 1.502.641 ha, …).
+2. Parquet-Export nach `data/` (`export_parquet.py … data`) mit
+   Rücklese-Verifikation: 400×109, Registry 109, `rs` als String mit
+   führenden Nullen.
+3. Bei inhaltlicher Änderung committiert der Bot selbst
+   (`chore(data): … [skip ci]`).
+
+Benötigt nur `openpyxl` + `pyarrow` (in der Action installiert) —
+die Kernpipeline kommt ohne numpy aus. Auch manuell startbar:
+*Actions → Build XLSX + Parquet → Run workflow*.
 
 ## Join-Schlüssel
 

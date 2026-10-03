@@ -7,14 +7,19 @@ Liest data/deutschland-rohdaten.xlsx (beide Blätter) und schreibt:
                                             Quelle, Erhebungsstand, Link,
                                             Anmerkung je Spalte)
 
+Optional als zweites Argument ein anderes Ausgabeverzeichnis
+(die GitHub-Action schreibt z. B. nach data/, wo die Release-
+Parquets committet werden).
+
 Typsicherung für R:
   - Textspalten (rs, name, type, bl, preis_miet, name_vgrdl) als String,
     führende Nullen des Regionalschlüssels bleiben erhalten
   - numerische Spalten je Wertlage: int64 (nur Ganzzahlen) oder double
   - leere Zellen -> NA
 
-Aufruf:  python3 src/export_parquet.py
-Ausgabe: dist/deutschland-rohdaten.parquet, dist/deutschland-variablen.parquet
+Aufruf:  python3 src/export_parquet.py [XLSX-Pfad] [Ausgabeverzeichnis]
+Ausgabe: <outdir>/deutschland-rohdaten.parquet, <outdir>/deutschland-variablen.parquet
+         (Standard-outdir: dist/)
 """
 import os
 import sys
@@ -78,6 +83,7 @@ def load_registry(ws):
 
 def main():
     src = sys.argv[1] if len(sys.argv) > 1 else XLSX
+    outdir = sys.argv[2] if len(sys.argv) > 2 else DIST
     wb = openpyxl.load_workbook(src, read_only=True, data_only=True)
     raw = load_raw(wb["Rohdaten"])
     reg = load_registry(wb["Quellen & Variablen"])
@@ -87,9 +93,9 @@ def main():
     assert all(c in raw_keys for c in reg["Spalte"].to_pylist()), \
         "Registry-Spalten passen nicht zur Rohdaten-Tabelle"
 
-    os.makedirs(DIST, exist_ok=True)
-    out_raw = os.path.join(DIST, "deutschland-rohdaten.parquet")
-    out_reg = os.path.join(DIST, "deutschland-variablen.parquet")
+    os.makedirs(outdir, exist_ok=True)
+    out_raw = os.path.join(outdir, "deutschland-rohdaten.parquet")
+    out_reg = os.path.join(outdir, "deutschland-variablen.parquet")
     pq.write_table(raw, out_raw)
     pq.write_table(reg, out_reg)
     print("OK: %s (%d Zeilen x %d Spalten)" % (out_raw, raw.num_rows, raw.num_columns))

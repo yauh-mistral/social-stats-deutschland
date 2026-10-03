@@ -76,7 +76,9 @@ Kontext laden, bevor Skripte geändert werden.
 - **Sandbox-Umgebungen:** numpy/openpyxl sind ggf. nur über das
   gebündelte data-analysis-Library aktivierbar; **pyarrow ist dort
   nicht enthalten** — `export_parquet.py` nur in eigener Umgebung mit
-  `pip install pyarrow` ausführen.
+  `pip install pyarrow` ausführen. Der Release-Parquet wird aber
+  ohnehin von der GitHub-Action gebaut und nach `data/` committet;
+  lokal ist pyarrow nur für eigene Parquet-Builds nötig.
 
 ## Konventionen
 
@@ -121,7 +123,9 @@ benötigt.
   erst die Ursache in den Quelldaten finden.
 - `data/merged_raw_base.json` (entpackt) nicht committen; die
   xz+Ascii85-Fassung ist die committete Form.
-- `data/deutschland-rohdaten.xlsx` nicht manuell bauen und committen:
-  Der GitHub-Actions-Workflow `build-xlsx.yml` baut sie nach jedem
-  Push automatisch aus den committeten Basisdateien und committet sie
-  bei inhaltlicher Änderung selbst.
+- `data/deutschland-rohdaten.xlsx` und die Release-Parquets
+  (`data/deutschland-rohdaten.parquet`, `data/deutschland-variablen.parquet`)
+  nicht manuell bauen und committen: Der GitHub-Actions-Workflow
+  `build-xlsx.yml` läuft bei jedem Push auf `main`, verifiziert die
+  Parquets per Rücklesen (400×109, rs mit führenden Nullen) und
+  committet bei inhaltlicher Änderung selbst.

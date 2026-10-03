@@ -1,16 +1,18 @@
-# Baut data/deutschland-rohdaten.xlsx aus den committeten Datenbasis-Dateien
-# und committet sie, falls sich Inhalte geaendert haben. Damit ist die
-# Binaerdatei immer synchron zum Quellcode (Agent-Umgebungen koennen keine
-# Binaerdateien pushen, lokale Builds sind dafuer nicht noetig).
-name: Build XLSX
+# Baut die Release-Artefakte aus den committeten, verifizierten Daten:
+#   data/deutschland-rohdaten.xlsx      (401 x 109 + Registry-Blatt)
+#   data/deutschland-rohdaten.parquet   (400 x 109, R-Analyse)
+#   data/deutschland-variablen.parquet (Registry, 109 Eintraege)
+# Laeuft bei JEDEM Push auf main und committet bei inhaltlicher
+# Aenderung selbst ([skip ci]-Marker verhindert Schleifen).
+# Kernpipeline (unpack_base -> parse_zensus -> merge -> build_xlsx)
+# braucht nur openpyxl und validiert per Assertions gegen amtliche
+# Pruefzahlen; der Parquet-Step fuegt pyarrow hinzu und liest die
+# Dateien zur Verifikation zurueck.
+name: Build XLSX + Parquet
 
 on:
   push:
     branches: [main]
-    paths:
-      - 'data/**'
-      - 'src/**'
-      - '.github/workflows/build-xlsx.yml'
   workflow_dispatch:
 
 permissions:
@@ -27,7 +29,7 @@ jobs:
           python-version: '3.12'
 
       - name: Abhaengigkeiten
-        run: pip install openpyxl
+        run: pip install openpyxl pyarrow
 
       - name: Pipeline (Basis entpacken, Zensus einarbeiten, mergen, XLSX bauen)
         run: |
@@ -36,14 +38,30 @@ jobs:
           python3 src/merge.py
           python3 src/build_xlsx.py data/deutschland-rohdaten.xlsx
 
+      - name: Parquet-Export (Release nach data/)
+        run: python3 src/export_parquet.py data/deutschland-rohdaten.xlsx data
+
+      - name: Verifikation (Parquet zuruecklesen, Struktur und rs pruefen)
+        run: |
+          python3 - <<'PY'
+          import pyarrow.parquet as pq
+          t = pq.read_table('data/deutschland-rohdaten.parquet')
+          assert t.num_rows == 400 and t.num_columns == 109, (t.num_rows, t.num_columns)
+          r = pq.read_table('data/deutschland-variablen.parquet')
+          assert r.num_rows == 109, r.num_rows
+          rs = set(t.column('rs').to_pylist())
+          assert '01001' in rs and '11000' in rs and '02000' in rs, 'fuehrende Nullen verloren'
+          print('OK: parquet 400x109, registry 109, rs mit fuehrenden Nullen')
+          PY
+
       - name: Bei Aenderung committen
         run: |
-          if git diff --quiet -- data/deutschland-rohdaten.xlsx; then
-            echo "XLSX unveraendert, kein Commit noetig."
+          git add data/deutschland-rohdaten.xlsx data/deutschland-rohdaten.parquet data/deutschland-variablen.parquet
+          if git diff --cached --quiet; then
+            echo "Release-Artefakte unveraendert, kein Commit noetig."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/deutschland-rohdaten.xlsx
-          git commit -m "chore(data): deutschland-rohdaten.xlsx aus Pipeline neu gebaut [skip ci]"
+          git commit -m "chore(data): Release-Artefakte (XLSX + Parquet) aus Pipeline neu gebaut [skip ci]"
           git push
